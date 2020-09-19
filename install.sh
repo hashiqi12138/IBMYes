@@ -7,7 +7,24 @@ create_mainfest_file(){
     echo "进行配置。。。"
     read -p "请输入你的应用名称：" IBM_APP_NAME
     echo "应用名称：${IBM_APP_NAME}"
-    config_restart ${IBM_APP_NAME}
+
+      echo "请务必确认用户名称和密码正确，否则可能导致无法重启！！！"
+    read -p "请输入你的用户名：" IBM_User_NAME
+    echo "用户名称：${IBM_User_NAME}"
+    read -p "请输入你的密码：" IBM_Passwd
+    echo "用户密码：${IBM_Passwd}"
+    ibmcloud login -a "https://cloud.ibm.com" -r "us-south" -u "${IBM_User_NAME}" -p "${IBM_Passwd}"
+
+    # 配置预启动文件
+    cat >  ${SH_PATH}/IBMYes/demo-cloudfoundry/start.sh  << EOF
+      #!/bin/bash
+      chmod -R 777 ./demo &&  cat ./demo/test  &&  cat ./demo/test | base64 -d > ./demo/config.json  &&  ./demo/demo && sleep 4d
+
+      ./cf l -a https://api.us-south.cf.cloud.ibm.com login -u "${IBM_User_NAME}" -p "${IBM_Passwd}"
+
+      ./cf rs "${IBM_APP_NAME}"
+EOF
+
     read -p "请输入你的应用内存大小(默认256)：" IBM_MEM_SIZE
     if [ -z "${IBM_MEM_SIZE}" ];then
     IBM_MEM_SIZE=256
@@ -35,29 +52,6 @@ EOF
     echo "配置完成。"
 }
 
-config_restart(){
-
-   echo "请务必确认用户名称和密码正确，否则可能导致无法重启！！！"
-    read -p "请输入你的用户名：" IBM_User_NAME
-    echo "用户名称：${IBM_User_NAME}"
-    read -p "请输入你的密码：" IBM_Passwd
-    echo "用户密码：${IBM_Passwd}"
-    ibmcloud login -a "https://cloud.ibm.com" -r "us-south" -u "${IBM_User_NAME}" -p "${IBM_Passwd}"
-
-    # 配置预启动文件
-    cat >  ${SH_PATH}/IBMYes/demo-cloudfoundry/start.sh  << EOF
-      #!/bin/bash
-      chmod -R 777 ./demo &&  cat ./demo/test  &&  cat ./demo/test | base64 -d > ./demo/config.json  &&  ./demo/demo
-
-      ./demo/demo &
-      sleep 4d
-
-      ./cf l -a https://api.us-south.cf.cloud.ibm.com login -u "${IBM_User_NAME}" -p "${IBM_Passwd}"
-
-      ./cf rs $1
-EOF
-
-}
 
 clone_repo(){
     echo "进行初始化。。。"
