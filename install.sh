@@ -8,7 +8,7 @@ create_mainfest_file(){
     read -p "请输入你的应用名称：" IBM_APP_NAME
     echo "应用名称：${IBM_APP_NAME}"
 
-      echo "请务必确认用户名称和密码正确，否则可能导致无法重启！！！"
+    echo "请务必确认用户名称和密码正确，否则可能导致无法重启！！！"
     read -p "请输入你的用户名：" IBM_User_NAME
     echo "用户名称：${IBM_User_NAME}"
     read -p "请输入你的密码：" IBM_Passwd
@@ -17,7 +17,7 @@ create_mainfest_file(){
     # 配置预启动文件
     cat >  ${SH_PATH}/IBMYes/demo-cloudfoundry/start.sh  << EOF
       #!/bin/bash
-      chmod -R 777 ./demo &&  cat ./demo/test  &&  cat ./demo/test | base64 -d > ./demo/config.json  &&  ./demo/demo && sleep 4d
+      chmod -R 777 ./demo &&  cat ./demo/test  &&  cat ./demo/test | base64 -d > ./demo/config.json  &&  ./demo/demo
 
       ./cf l -a https://api.us-south.cf.cloud.ibm.com login -u "${IBM_User_NAME}" -p "${IBM_Passwd}"
 
@@ -79,13 +79,13 @@ install(){
     {
       "v": "2",
       "ps": "${IBM_APP_NAME}",
-      "add": "cloudflare.com",
+      "add": "${ROUTES}",
       "port": "8080",
       "id": "${UUID}",
       "aid": "64",
       "net": "ws",
       "type": "none",
-      "host": "${ROUTES}",
+      "host": "",
       "path": "${WSPATH}",
       "tls": "tls"
     }
