@@ -7,7 +7,7 @@ create_mainfest_file(){
     echo "进行配置。。。"
     read -p "请输入你的应用名称：" IBM_APP_NAME
     echo "应用名称：${IBM_APP_NAME}"
-    config_restar ${IBM_APP_NAME}
+    config_restart ${IBM_APP_NAME}
     read -p "请输入你的应用内存大小(默认256)：" IBM_MEM_SIZE
     if [ -z "${IBM_MEM_SIZE}" ];then
     IBM_MEM_SIZE=256
@@ -35,7 +35,7 @@ EOF
     echo "配置完成。"
 }
 
-config_restar(){
+config_restart(){
 
    echo "请务必确认用户名称和密码正确，否则可能导致无法重启！！！"
     read -p "请输入你的用户名：" IBM_User_NAME
