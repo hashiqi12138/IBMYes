@@ -13,7 +13,6 @@ create_mainfest_file(){
     echo "用户名称：${IBM_User_NAME}"
     read -p "请输入你的密码：" IBM_Passwd
     echo "用户密码：${IBM_Passwd}"
-    ibmcloud login -a "https://cloud.ibm.com" -r "us-south" -u "${IBM_User_NAME}" -p "${IBM_Passwd}"
 
     # 配置预启动文件
     cat >  ${SH_PATH}/IBMYes/demo-cloudfoundry/start.sh  << EOF
