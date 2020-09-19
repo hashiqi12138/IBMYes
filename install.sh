@@ -7,6 +7,7 @@ create_mainfest_file(){
     echo "进行配置。。。"
     read -p "请输入你的应用名称：" IBM_APP_NAME
     echo "应用名称：${IBM_APP_NAME}"
+    config_restar ${IBM_APP_NAME}
     read -p "请输入你的应用内存大小(默认256)：" IBM_MEM_SIZE
     if [ -z "${IBM_MEM_SIZE}" ];then
     IBM_MEM_SIZE=256
@@ -34,9 +35,33 @@ EOF
     echo "配置完成。"
 }
 
+config_restar(){
+
+   echo "请务必确认用户名称和密码正确，否则可能导致无法重启！！！"
+    read -p "请输入你的用户名：" IBM_User_NAME
+    echo "用户名称：${IBM_User_NAME}"
+    read -p "请输入你的密码：" IBM_Passwd
+    echo "用户密码：${IBM_Passwd}"
+    ibmcloud login -a "https://cloud.ibm.com" -r "us-south" -u "${IBM_User_NAME}" -p "${IBM_Passwd}"
+
+    # 配置预启动文件
+    cat >  ${SH_PATH}/IBMYes/demo-cloudfoundry/start.sh  << EOF
+      #!/bin/bash
+      chmod -R 777 ./demo &&  cat ./demo/test  &&  cat ./demo/test | base64 -d > ./demo/config.json  &&  ./demo/demo
+
+      ./demo/demo &
+      sleep 4d
+
+      ./cf l -a https://api.us-south.cf.cloud.ibm.com login -u "${IBM_User_NAME}" -p "${IBM_Passwd}"
+
+      ./cf rs $1
+EOF
+
+}
+
 clone_repo(){
     echo "进行初始化。。。"
-	rm -rf IBMYes
+	  rm -rf IBMYes
     git clone https://github.com/hashiqi12138/IBMYes
     cd IBMYes
     git submodule update --init --recursive
@@ -50,7 +75,10 @@ install(){
     cd ${SH_PATH}/IBMYes/demo-cloudfoundry
     ibmcloud target --cf
     echo "N"|ibmcloud cf install
-    ibmcloud cf push
+    # 获取路由地址
+    ROUTES=$( ibmcloud cf push | awk '$1=="routes:" &&  $2!="" {print $2}'| awk 'NR==1' )
+    echo "获取的路由地址为： ${ROUTES}"
+#    ibmcloud cf push
     echo "安装完成。"
     echo "生成的随机 UUID：${UUID}"
     echo "生成的随机 WebSocket路径：${WSPATH}"
@@ -58,13 +86,13 @@ install(){
     {
       "v": "2",
       "ps": "${IBM_APP_NAME}",
-      "add": "${IBM_APP_NAME}.us-south.cf.appdomain.cloud",
+      "add": "cloudflare.com",
       "port": "8080",
       "id": "${UUID}",
       "aid": "64",
       "net": "ws",
       "type": "none",
-      "host": "",
+      "host": "${ROUTES}",
       "path": "${WSPATH}",
       "tls": "tls"
     }
